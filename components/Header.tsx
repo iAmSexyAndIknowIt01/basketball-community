@@ -5,18 +5,19 @@ import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/useAuth"
 import AuthModal from "./AuthForm"
-import { User as UserIcon } from "lucide-react"
+import { User as UserIcon, Menu, X } from "lucide-react"
 
 export default function Header() {
   const { isLoggedIn, userId } = useAuth()
   const [open, setOpen] = useState<"login" | "signup" | null>(null)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
     if (!error) {
-      // session болон user state-г clear хийх
       setProfileOpen(false)
+      setMenuOpen(false)
     } else {
       console.error("Logout error:", error.message)
     }
@@ -27,7 +28,8 @@ export default function Header() {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
         <Link href="/" className="text-lg font-bold">🏀 Hoop</Link>
 
-        <nav className="flex gap-6 text-sm text-gray-300 items-center">
+        {/* ================= Desktop menu ================= */}
+        <nav className="hidden md:flex gap-6 text-sm text-gray-300 items-center">
           <Link href="/games" className="hover:text-white">Games</Link>
           <Link href="/community" className="hover:text-white">Community</Link>
           <Link href="/profile" className="hover:text-white">Profile</Link>
@@ -48,7 +50,7 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <div className="relative ml-6">
+            <div className="relative ml-4">
               <button
                 onClick={() => setProfileOpen(prev => !prev)}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700"
@@ -59,7 +61,6 @@ export default function Header() {
               {profileOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-lg border border-white/10 bg-black/80 p-4 shadow-lg backdrop-blur text-sm text-gray-200 z-50">
                   <p className="mb-2">User ID: {userId?.slice(0, 8)}...</p>
-
                   <button
                     onClick={handleLogout}
                     className="w-full text-left rounded px-2 py-1 hover:bg-white/10"
@@ -71,7 +72,56 @@ export default function Header() {
             </div>
           )}
         </nav>
+
+        {/* ================= Burger button (mobile) ================= */}
+        <button
+          onClick={() => setMenuOpen(prev => !prev)}
+          className="md:hidden text-white"
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {/* ================= Mobile menu ================= */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-white/10 bg-black/90">
+          <div className="flex flex-col gap-4 px-4 py-4 text-gray-300">
+            <Link href="/games" onClick={() => setMenuOpen(false)}>Games</Link>
+            <Link href="/community" onClick={() => setMenuOpen(false)}>Community</Link>
+            <Link href="/profile" onClick={() => setMenuOpen(false)}>Profile</Link>
+
+            {!isLoggedIn ? (
+              <>
+                <button
+                  onClick={() => {
+                    setOpen("login")
+                    setMenuOpen(false)
+                  }}
+                  className="rounded-lg border border-white/10 px-4 py-2"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setOpen("signup")
+                    setMenuOpen(false)
+                  }}
+                  className="btn-primary"
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="text-left rounded px-2 py-1 hover:bg-white/10"
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {open && <AuthModal mode={open} onClose={() => setOpen(null)} />}
     </header>
