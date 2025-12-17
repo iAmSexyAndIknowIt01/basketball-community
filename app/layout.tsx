@@ -1,5 +1,6 @@
 import "./globals.css"
 import Link from "next/link"
+import Header from "@/components/Header"
 
 export default function RootLayout({
   children,
@@ -10,7 +11,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {/* Navbar */}
-        <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur">
+        {/* <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <Link href="/" className="text-lg font-bold">
               🏀 Hoop
@@ -22,10 +23,11 @@ export default function RootLayout({
               <Link href="/profile" className="hover:text-white">Profile</Link>
             </nav>
           </div>
-        </header>
+        </header> */}
 
         {/* Page */}
         <main className="mx-auto max-w-5xl px-4 py-6">
+          <Header/>
           {children}
         </main>
       </body>

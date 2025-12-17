@@ -25,16 +25,35 @@ export default function AuthModal({
 
     try {
       if (view === "login") {
-        await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        if (error) throw error
         onClose()
       }
 
       if (view === "signup") {
-        const { data } = await supabase.auth.signUp({ email, password })
-        await supabase.from("profiles").insert({
-          id: data.user?.id,
-          name,
+        // 1️⃣ Supabase auth-д user үүсгэх
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
         })
+        if (error) throw error
+
+        // 2️⃣ profiles table-д id болон name insert хийх
+        if (data.user?.id) {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert({
+              id: data.user.id,
+              name,
+            })
+
+          if (profileError) throw profileError
+        }
+
+        // 3️⃣ Modal хаах
         onClose()
       }
 
@@ -55,7 +74,7 @@ export default function AuthModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md mx-auto my-auto">
         {/* Glow */}
         <div className="absolute -inset-1 rounded-3xl bg-linear-to-br from-green-500/30 via-emerald-500/10 to-transparent blur-2xl" />
 
