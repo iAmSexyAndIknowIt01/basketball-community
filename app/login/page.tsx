@@ -1,5 +1,15 @@
-import AuthForm from "@/components/AuthForm"
+"use client"
+
+import AuthModal from "@/components/AuthForm"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-  return <AuthForm type="login" />
+  const router = useRouter()
+
+  return (
+    <AuthModal
+      mode="login"
+      onClose={() => router.push("/")}
+    />
+  )
 }
