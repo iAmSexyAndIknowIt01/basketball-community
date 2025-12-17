@@ -1,35 +1,37 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import AuthModal from "./AuthForm"
 import { useAuth } from "@/lib/useAuth"
+import AuthModal from "./AuthForm"
+import { User as UserIcon } from "lucide-react"
 
 export default function Header() {
   const { isLoggedIn, userId } = useAuth()
   const [open, setOpen] = useState<"login" | "signup" | null>(null)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
+    const { error } = await supabase.auth.signOut()
+    if (!error) {
+      // session болон user state-г clear хийх
+      setProfileOpen(false)
+    } else {
+      console.error("Logout error:", error.message)
+    }
   }
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-        {/* Logo */}
-        <Link href="/" className="text-lg font-bold">
-          🏀 Hoop
-        </Link>
+        <Link href="/" className="text-lg font-bold">🏀 Hoop</Link>
 
-        {/* Navigation */}
         <nav className="flex gap-6 text-sm text-gray-300 items-center">
           <Link href="/games" className="hover:text-white">Games</Link>
           <Link href="/community" className="hover:text-white">Community</Link>
           <Link href="/profile" className="hover:text-white">Profile</Link>
 
-          {/* Auth Buttons */}
           {!isLoggedIn ? (
             <>
               <button
@@ -46,29 +48,32 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <div className="flex items-center gap-3 text-sm text-gray-400">
-              Logged in <span className="text-green-400">{userId?.slice(0, 6)}...</span>
+            <div className="relative ml-6">
               <button
-                onClick={handleLogout}
-                className="ml-4 rounded-lg border border-white/10 px-3 py-1 text-sm hover:bg-white/5"
+                onClick={() => setProfileOpen(prev => !prev)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700"
               >
-                Logout
+                <UserIcon size={18} className="text-white" />
               </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-lg border border-white/10 bg-black/80 p-4 shadow-lg backdrop-blur text-sm text-gray-200 z-50">
+                  <p className="mb-2">User ID: {userId?.slice(0, 8)}...</p>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left rounded px-2 py-1 hover:bg-white/10"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </nav>
-
-        {/* Auth Modal */}
-        {open && (
-          <AuthModal
-            mode={open}
-            onClose={() => setOpen(null)}
-          />
-        )}
       </div>
+
+      {open && <AuthModal mode={open} onClose={() => setOpen(null)} />}
     </header>
   )
-}
-function setUser(arg0: null) {
-    throw new Error("Function not implemented.")
 }
