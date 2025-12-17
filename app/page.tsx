@@ -1,65 +1,80 @@
-import Image from "next/image";
+import Link from "next/link"
+import { games } from "@/lib/dummy/games"
+import { posts } from "@/lib/dummy/posts"
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="space-y-10">
+
+      {/* HERO */}
+      <section className="rounded-2xl bg-linear-to-br from-green-500/20 to-transparent p-8">
+        <h1 className="mb-2 text-3xl font-bold">
+          🏀 Basketball Community
+        </h1>
+        <p className="max-w-xl text-gray-400">
+          Join local pickup games, connect with players,
+          and grow your basketball community.
+        </p>
+
+        <div className="mt-6 flex gap-3">
+          <Link href="/games" className="btn-primary">
+            Find Games
+          </Link>
+          <Link
+            href="/community"
+            className="rounded-lg border border-white/10 px-4 py-2"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Community Feed
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* UPCOMING GAMES */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Upcoming Games</h2>
+          <Link href="/games" className="text-sm text-gray-400 hover:text-white">
+            View all →
+          </Link>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {games.slice(0, 2).map(game => (
+            <div key={game.id} className="card">
+              <h3 className="font-medium">{game.title}</h3>
+              <p className="text-sm text-gray-400">{game.location}</p>
+              <p className="text-xs text-gray-500">
+                {new Date(game.game_date).toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* COMMUNITY POSTS */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Community</h2>
+          <Link
+            href="/community"
+            className="text-sm text-gray-400 hover:text-white"
+          >
+            Open feed →
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          {posts.slice(0, 2).map(post => (
+            <div key={post.id} className="card">
+              <p className="text-sm text-gray-300">{post.content}</p>
+              <p className="mt-2 text-xs text-gray-500">
+                — {post.author}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
     </div>
-  );
+  )
 }
