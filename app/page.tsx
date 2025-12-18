@@ -1,110 +1,56 @@
 "use client"
 
-import Link from "next/link"
 import { useEffect } from "react"
 import { useAppStore } from "@/lib/store/useAppStore"
-import EmptyState from "@/components/EmptyState"
-import { SkeletonCard } from "@/components/Skeleton"
+import { useAuth } from "@/lib/useAuth"
+
 import Stats from "@/components/Stats"
+import LandingHero from "@/components/home/LandingHero"
+import LandingFeatures from "@/components/home/LandingFeatures"
+import HowItWorks from "@/components/home/HowItWorks"
+import CallToAction from "@/components/home/CallToAction"
+
+import DashboardHeader from "@/components/home/DashboardHeader"
+import QuickActions from "@/components/home/QuickActions"
+import GamesSection from "@/components/home/GamesSection"
+import MyActivity from "@/components/home/MyActivity"
+import PostsSection from "@/components/home/PostsSection"
 
 export default function Home() {
+  const { isLoggedIn, userId } = useAuth()
   const { user, games, posts, loading, fetchGames, fetchPosts } = useAppStore()
 
-  // API fetch on mount
   useEffect(() => {
-    fetchGames()
-    fetchPosts()
-  }, [fetchGames, fetchPosts])
+    if (isLoggedIn && userId) {
+      fetchGames()
+      fetchPosts()
+    }
+  }, [isLoggedIn, userId, fetchGames, fetchPosts])
 
-  // 🔓 LOGGED OUT → LANDING PAGE
-  if (!user) {
+  /* 🔓 Logged out */
+  if (!isLoggedIn) {
     return (
       <div className="space-y-10">
-
-        {/* HERO */}
-        <section className="rounded-2xl bg-linear-to-br from-green-500/20 p-10">
-          <h1 className="text-4xl font-bold mb-3">
-            🏀 Basketball Community
-          </h1>
-          <p className="max-w-xl text-gray-400">
-            Find games, meet players, and grow together.
-          </p>
-
-          <div className="mt-6 flex gap-3">
-            {/* <Link href="/signup" className="btn-primary">
-              Join now
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-lg border border-white/10 px-4 py-2"
-            >
-              Login
-            </Link> */}
-          </div>
-        </section>
-
+        <LandingHero />
         <Stats />
-
-        {/* FEATURES */}
-        <section className="grid gap-4 sm:grid-cols-3">
-          <div className="card">🏀 Create & join games</div>
-          <div className="card">💬 Community feed</div>
-          <div className="card">💳 Membership access</div>
-        </section>
+        <LandingFeatures />
+        <HowItWorks />
+        <CallToAction />
       </div>
     )
   }
 
-  // 🔐 LOGGED IN → DASHBOARD
+  /* 🔐 Logged in */
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">
-        Welcome back, {user.name}
-      </h2>
-
-      {/* GAMES */}
-      <section>
-        <h3 className="mb-2 font-semibold">Upcoming Games</h3>
-
-        {loading && <SkeletonCard />}
-
-        {!loading && games.length === 0 && (
-          <EmptyState
-            title="No games yet"
-            description="Create or join a game to get started"
-          />
-        )}
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          {games.map(game => (
-            <div key={game.id} className="card">
-              <p className="font-medium">{game.title}</p>
-              <p className="text-sm text-gray-400">{game.location}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* POSTS */}
-      <section>
-        <h3 className="mb-2 font-semibold">Community</h3>
-
-        {loading && <SkeletonCard />}
-
-        {!loading && posts.length === 0 ? (
-          <EmptyState
-            title="No posts yet"
-            description="Start the conversation"
-          />
-        ) : (
-          posts.map(post => (
-            <div key={post.id} className="card mb-2">
-              <p>{post.content}</p>
-              <p className="text-gray-400 text-xs">— {post.author}</p>
-            </div>
-          ))
-        )}
-      </section>
+      {user && <DashboardHeader name={user.name} />}
+      <QuickActions />
+      <MyActivity
+        gamesCount={games.length}
+        postsCount={posts.length}
+      />
+      <GamesSection games={games} loading={loading} />
+      <PostsSection posts={posts} loading={loading} />
     </div>
   )
 }

@@ -13,7 +13,7 @@ body {
   color: white;
 }
 
-/* .input {
+.input {
   @apply w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2 text-sm outline-none focus:border-green-500;
 }
 
@@ -23,5 +23,9 @@ body {
 
 
 .card {
-  @apply rounded-xl bg-[var(--card)] p-4 shadow-lg;
+  @apply rounded-xl bg-(--card) p-4 shadow-lg;
+}
+
+/* .card {
+  @apply rounded-xl bg-neutral-800/80 border border-white/10 p-4;
 } */
