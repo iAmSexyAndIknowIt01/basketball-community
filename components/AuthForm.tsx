@@ -4,6 +4,7 @@ import { useState } from "react"
 import { supabase } from "@/lib/supabase"
 import PasswordStrength from "./PasswordStrength"
 import { Mail, Lock, User, X } from "lucide-react"
+import Portal from "@/components/Portal"
 
 export default function AuthModal({
   mode,
@@ -73,13 +74,14 @@ export default function AuthModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-md mx-auto my-auto">
+    <Portal>
+      <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm">
+      <div className="absolute left-1/2 top-1/2 w-full max-w-md px-4 -translate-x-1/2 -translate-y-1/2">
         {/* Glow */}
         <div className="absolute -inset-1 rounded-3xl bg-linear-to-br from-green-500/30 via-emerald-500/10 to-transparent blur-2xl" />
 
         {/* Card */}
-        <div className="relative rounded-3xl border border-white/10 bg-black/80 p-8 shadow-2xl backdrop-blur">
+        <div className="relative max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-black/80 p-8 shadow-2xl backdrop-blur">
           {/* Close */}
           <button
             onClick={onClose}
@@ -209,6 +211,8 @@ export default function AuthModal({
         </div>
       </div>
     </div>
+    </Portal>
+    
   )
 }
 
