@@ -26,6 +26,6 @@ body {
   @apply rounded-xl bg-(--card) p-4 shadow-lg;
 }
 
-/* .card {
+.card {
   @apply rounded-xl bg-neutral-800/80 border border-white/10 p-4;
-} */
+}
