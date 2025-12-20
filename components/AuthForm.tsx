@@ -42,15 +42,21 @@ export default function AuthModal({
         })
         if (error) throw error
 
+        if (!data.user) {
+          setMessage("Check your email to confirm signup")
+          return
+        }
         // 2️⃣ profiles table-д id болон name insert хийх
         if (data.user?.id) {
           const { error: profileError } = await supabase
             .from("profiles")
             .insert({
               id: data.user.id,
-              name,
+              email: data.user.email,
+              name: name,
             })
 
+          console.log("profileError", profileError?.message);
           if (profileError) throw profileError
         }
 
