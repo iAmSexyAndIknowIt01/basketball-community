@@ -45,6 +45,7 @@ export default function Header() {
           <Link href="/games" className="hover:text-white">Games</Link>
           <Link href="/community" className="hover:text-white">Community</Link>
           <Link href="/profile" className="hover:text-white">Profile</Link>
+          <Link href="/blog" className="hover:text-white">Blog</Link> {/* ✅ */}
 
           {!isLoggedIn ? (
             <>
@@ -103,6 +104,7 @@ export default function Header() {
             <Link href="/games" onClick={() => setMenuOpen(false)}>Games</Link>
             <Link href="/community" onClick={() => setMenuOpen(false)}>Community</Link>
             <Link href="/profile" onClick={() => setMenuOpen(false)}>Profile</Link>
+            <Link href="/blog" onClick={() => setMenuOpen(false)}>Blog</Link>
 
             {!isLoggedIn ? (
               <>
