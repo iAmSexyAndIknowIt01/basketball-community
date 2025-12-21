@@ -71,11 +71,66 @@ export default function GamesPage() {
     setGames(prev => [...prev, data])
   }
 
-  /* ================= JOIN GAME ================= */
+  /* ================= JOIN / CANCEL GAME ================= */
   const handleJoinGame = async (game: Game) => {
     if (!userId) return
-    if (joinedGameIds.has(game.id)) return // already joined
+    const hasJoined = joinedGameIds.has(game.id)
 
+    // Cancel join
+    if (hasJoined) {
+      const confirmCancel = confirm("Та тоглолтоос гарахдаа итгэлтэй байна уу?")
+      if (!confirmCancel) return
+
+      try {
+        setJoiningGameId(game.id)
+
+        // 1️⃣ game_players-с устгах
+        const { error: gpError } = await supabase
+          .from("game_players")
+          .delete()
+          .eq("game_id", game.id)
+          .eq("user_id", userId)
+
+        if (gpError) {
+          alert(gpError.message)
+          return
+        }
+
+        // 2️⃣ games.players -1
+        const { data: currentGame, error: fetchError } = await supabase
+          .from("games")
+          .select("players")
+          .eq("id", game.id)
+          .single()
+
+        if (!fetchError && currentGame) {
+          const { error: gError } = await supabase
+            .from("games")
+            .update({ players: currentGame.players - 1 })
+            .eq("id", game.id)
+
+          if (gError) console.error("Failed to update players count:", gError.message)
+        }
+
+        // 3️⃣ UI update
+        setGames(prev =>
+          prev.map(g => (g.id === game.id ? { ...g, players: g.players - 1 } : g))
+        )
+        setJoinedGameIds(prev => {
+          const copy = new Set(prev)
+          copy.delete(game.id)
+          return copy
+        })
+      } catch (err) {
+        console.error("Cancel join failed:", err)
+      } finally {
+        setJoiningGameId(null)
+      }
+
+      return
+    }
+
+    // New join
     if (game.players >= game.max_players) {
       alert("This game is full")
       return
@@ -92,16 +147,24 @@ export default function GamesPage() {
         alert(gpError.message)
         return
       }
-      console.log("Joined game:", game.id)
+
       // Update games.players
-      const { error: gError } = await supabase
+      const { data: currentGame, error: fetchError } = await supabase
         .from("games")
-        .update({ players: game.players + 1 })
+        .select("players")
         .eq("id", game.id)
+        .single()
 
-      if (gError) console.error("Failed to update players count:", gError.message)
+      if (!fetchError && currentGame) {
+        const { error: gError } = await supabase
+          .from("games")
+          .update({ players: game.players + 1 })
+          .eq("id", game.id)
 
-      // Update UI
+        if (gError) console.error("Failed to update players count:", gError.message)
+      }
+
+      // UI update
       setGames(prev =>
         prev.map(g => (g.id === game.id ? { ...g, players: g.players + 1 } : g))
       )
@@ -118,7 +181,6 @@ export default function GamesPage() {
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Games</h1>
-
         {isAdmin && <CreateGameModal onCreate={handleCreateGame} />}
       </div>
 
@@ -126,6 +188,12 @@ export default function GamesPage() {
         {games.map(game => {
           const isFull = game.players >= game.max_players
           const hasJoined = joinedGameIds.has(game.id)
+
+          // Button class өнгөөр ялгах + жижиг хэмжээ
+          let btnClass = "btn-sm mt-2 text-white w-full py-1 rounded"
+          if (hasJoined) btnClass += " bg-red-600 hover:bg-red-700"
+          else if (isFull) btnClass += " bg-gray-400 cursor-not-allowed"
+          else btnClass += " bg-green-600 hover:bg-green-700"
 
           return (
             <div key={game.id} className="card p-4 border border-white/10 rounded-lg">
@@ -140,12 +208,12 @@ export default function GamesPage() {
 
               {isLoggedIn && (
                 <button
-                  className="btn-primary mt-2"
-                  disabled={isFull || joiningGameId === game.id || hasJoined}
+                  className={btnClass}
+                  disabled={joiningGameId === game.id || (isFull && !hasJoined)}
                   onClick={() => handleJoinGame(game)}
                 >
                   {hasJoined
-                    ? "Joined"
+                    ? "Cancel"
                     : isFull
                     ? "Full"
                     : joiningGameId === game.id
