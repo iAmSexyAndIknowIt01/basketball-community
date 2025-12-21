@@ -1,30 +1,132 @@
 "use client"
+
 import { useState } from "react"
 
-export default function CreateGameModal() {
+/* ================= TYPES ================= */
+
+export type NewGame = {
+  title: string
+  location: string
+  game_date: string
+  max_players: number
+}
+
+interface CreateGameModalProps {
+  onCreate: (newGame: NewGame) => Promise<void>
+}
+
+/* ================= COMPONENT ================= */
+
+export default function CreateGameModal({
+  onCreate,
+}: CreateGameModalProps) {
   const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState("")
+  const [location, setLocation] = useState("")
+  const [gameDate, setGameDate] = useState("")
+  const [maxPlayers, setMaxPlayers] = useState<number | "">("")
+  const [saving, setSaving] = useState(false)
+
+  const reset = () => {
+    setTitle("")
+    setLocation("")
+    setGameDate("")
+    setMaxPlayers("")
+  }
+
+  const handleSave = async () => {
+    // 🔒 validation
+    if (!title || !location || !gameDate || !maxPlayers) return
+
+    // 🔒 runtime safety
+    if (typeof onCreate !== "function") {
+      console.error("CreateGameModal: onCreate prop is missing")
+      return
+    }
+
+    const newGame: NewGame = {
+      title,
+      location,
+      game_date: new Date(gameDate).toISOString(),
+      max_players: Number(maxPlayers),
+    }
+
+    try {
+      setSaving(true)
+      await onCreate(newGame)
+      setOpen(false)
+      reset()
+    } catch (err) {
+      console.error("Failed to create game:", err)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <>
-      <button className="btn-primary" onClick={() => setOpen(true)}>
+      {/* OPEN BUTTON */}
+      <button
+        className="btn-primary"
+        onClick={() => setOpen(true)}
+      >
         + Create Game
       </button>
 
+      {/* MODAL */}
       {open && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-          <div className="card w-full max-w-md space-y-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="card w-full max-w-md space-y-3 p-4">
             <h2 className="text-lg font-bold">Create Game</h2>
 
-            <input className="input" placeholder="Title" />
-            <input className="input" placeholder="Location" />
-            <input className="input" type="datetime-local" />
-            <input className="input" type="number" placeholder="Max players" />
+            <input
+              className="input"
+              placeholder="Title"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+            />
 
-            <div className="flex gap-2">
-              <button className="btn-primary w-full">Save</button>
+            <input
+              className="input"
+              placeholder="Location"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+            />
+
+            <input
+              className="input"
+              type="datetime-local"
+              value={gameDate}
+              onChange={e => setGameDate(e.target.value)}
+            />
+
+            <input
+              className="input"
+              type="number"
+              placeholder="Max players"
+              value={maxPlayers === "" ? "" : String(maxPlayers)}
+              onChange={e =>
+                setMaxPlayers(
+                  e.target.value === "" ? "" : Number(e.target.value)
+                )
+              }
+            />
+
+            <div className="flex gap-2 pt-2">
+              <button
+                className="btn-primary w-full"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+
               <button
                 className="w-full rounded-lg border border-white/10"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false)
+                  reset()
+                }}
               >
                 Cancel
               </button>
