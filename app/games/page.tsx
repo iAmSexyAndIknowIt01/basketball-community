@@ -159,18 +159,20 @@ export default function GamesPage() {
               <p className="text-xs text-gray-500">{new Date(game.game_date).toLocaleString()}</p>
               <p className="text-xs">{game.players}/{game.max_players} players</p>
 
-              <button
-                className={`mt-2 w-full py-1 rounded text-white ${
-                  hasJoined ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation() // Card-н onClick-тэй мөргөлдөөс сэргийлэх
-                  handleJoinGame(game)
-                }}
-                disabled={joiningGameId === game.id || (!hasJoined && isFull)}
-              >
-                {hasJoined ? "Cancel" : isFull ? "Full" : "Join"}
-              </button>
+              {isLoggedIn && (
+                <button
+                  className={`mt-2 w-full py-1 rounded text-white ${
+                    hasJoined ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation() // Card-н onClick-тэй мөргөлдөөс сэргийлэх
+                    handleJoinGame(game)
+                  }}
+                  disabled={joiningGameId === game.id || (!hasJoined && isFull)}
+                >
+                  {hasJoined ? "Cancel" : isFull ? "Full" : "Join"}
+                </button>
+              )}
             </div>
           )
         })}
