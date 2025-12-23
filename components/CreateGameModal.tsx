@@ -9,6 +9,8 @@ export type NewGame = {
   location: string
   game_date: string
   max_players: number
+  team_a_name: string
+  team_b_name: string
 }
 
 interface CreateGameModalProps {
@@ -21,10 +23,14 @@ export default function CreateGameModal({
   onCreate,
 }: CreateGameModalProps) {
   const [open, setOpen] = useState(false)
+
   const [title, setTitle] = useState("")
   const [location, setLocation] = useState("")
   const [gameDate, setGameDate] = useState("")
   const [maxPlayers, setMaxPlayers] = useState<number | "">("")
+  const [teamA, setTeamA] = useState("")
+  const [teamB, setTeamB] = useState("")
+
   const [saving, setSaving] = useState(false)
 
   const reset = () => {
@@ -32,11 +38,21 @@ export default function CreateGameModal({
     setLocation("")
     setGameDate("")
     setMaxPlayers("")
+    setTeamA("")
+    setTeamB("")
   }
 
   const handleSave = async () => {
     // 🔒 validation
-    if (!title || !location || !gameDate || !maxPlayers) return
+    if (
+      !title ||
+      !location ||
+      !gameDate ||
+      !maxPlayers ||
+      !teamA ||
+      !teamB
+    )
+      return
 
     // 🔒 runtime safety
     if (typeof onCreate !== "function") {
@@ -49,6 +65,8 @@ export default function CreateGameModal({
       location,
       game_date: new Date(gameDate).toISOString(),
       max_players: Number(maxPlayers),
+      team_a_name: teamA,
+      team_b_name: teamB,
     }
 
     try {
@@ -66,10 +84,7 @@ export default function CreateGameModal({
   return (
     <>
       {/* OPEN BUTTON */}
-      <button
-        className="btn-primary"
-        onClick={() => setOpen(true)}
-      >
+      <button className="btn-primary" onClick={() => setOpen(true)}>
         + Create Game
       </button>
 
@@ -110,6 +125,21 @@ export default function CreateGameModal({
                   e.target.value === "" ? "" : Number(e.target.value)
                 )
               }
+            />
+
+            {/* 🆕 TEAM INPUTS */}
+            <input
+              className="input"
+              placeholder="Team A name"
+              value={teamA}
+              onChange={e => setTeamA(e.target.value)}
+            />
+
+            <input
+              className="input"
+              placeholder="Team B name"
+              value={teamB}
+              onChange={e => setTeamB(e.target.value)}
             />
 
             <div className="flex gap-2 pt-2">
